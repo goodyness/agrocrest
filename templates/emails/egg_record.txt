@@ -1,0 +1,10 @@
+Hello Admin,
+
+A new egg record has been submitted.
+
+Worker: {{ worker.username }}
+Crates: {{ record.crates }}
+Pieces: {{ record.pieces }}
+Date: {{ record.date }}
+
+Please check the dashboard for more details.

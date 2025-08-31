@@ -1,0 +1,9 @@
+⚠️ Feed Low Stock Alert
+
+The following feed categories are running low (3 bags or less):
+
+{% for alert in alerts %}
+- {{ alert.category }} → Remaining: {{ alert.remaining }} bags
+{% endfor %}
+
+Please arrange for restocking soon.

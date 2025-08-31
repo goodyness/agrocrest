@@ -1,0 +1,11 @@
+Hello Admin,
+
+A new sale record has been submitted.
+
+Worker: {{ worker.username }}
+Product: {{ record.product }}
+Quantity Sold: {{ record.quantity }}
+Amount: ₦{{ record.amount }}
+Date: {{ record.date }}
+
+Please check the dashboard for more details.

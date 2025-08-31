@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center text-center py-16">
+    <!-- Heading -->
+    <h1 class="text-4xl md:text-5xl font-extrabold text-green-700 mb-4">
+        Welcome to AgroCrest Farm
+    </h1>
+
+    <!-- Subtitle -->
+    <p class="text-lg md:text-xl text-gray-600 max-w-2xl mb-10">
+        Your daily farm record management system.
+    </p>
+
+    {% if user.is_authenticated %}
+        <div class="bg-white shadow-lg rounded-2xl p-6 max-w-md w-full border border-gray-200">
+            <p class="text-gray-700 mb-4">
+                👋 Hello <span class="font-semibold">{{ user.name }}</span> 
+                <span class="text-sm text-gray-500">({{ user.role }})</span>
+            </p>
+
+            {% if user.role == "worker" %}
+                <a href="{% url 'worker_dashboard' %}" 
+                   class="block w-full text-center px-5 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition">
+                    Go to Worker Dashboard
+                </a>
+            {% else %}
+                <a href="{% url 'admin_dashboard' %}" 
+                   class="block w-full text-center px-5 py-3 bg-yellow-500 text-gray-900 font-medium rounded-xl hover:bg-yellow-600 transition">
+                    Go to Admin Dashboard
+                </a>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="flex gap-4">
+            <a href="{% url 'login' %}" 
+               class="px-6 py-3 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 transition">
+                Login
+            </a>
+            <a href="{% url 'signup' %}" 
+               class="px-6 py-3 rounded-xl bg-yellow-400 text-gray-900 font-medium hover:bg-yellow-500 transition">
+                Sign Up
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+<h2>Weekly Farm Report</h2>
+
+<h3>📦 Feed Summary</h3>
+<table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+        <th>Animal Category</th>
+        <th>Purchased (Bags)</th>
+        <th>Used (Bags)</th>
+        <th>Remaining (Bags)</th>
+    </tr>
+    {% for category, remaining in feed_remaining.items %}
+        <tr>
+            <td>{{ category }}</td>
+            <td>{% for p in feed_purchased %}{% if p.animal_category == category %}{{ p.total_bags }}{% endif %}{% endfor %}</td>
+            <td>{% for u in feed_used %}{% if u.animal_category == category %}{{ u.total_used }}{% endif %}{% endfor %}</td>
+            <td>{{ remaining }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<h3>💰 Financial Summary</h3>
+<ul>
+    <li>Total Feed Cost: ₦{{ total_feed_cost }}</li>
+    <li>Total Expenses: ₦{{ total_expenses }}</li>
+    <li>Total Sales Income: ₦{{ total_sales_income }}</li>
+    <li>Profit: <strong>{% if profit >= 0 %}₦{{ profit }}{% else %}<span style="color:red">₦{{ profit }}</span>{% endif %}</strong></li>
+</ul>
+
+<h3>🛒 Sales Summary</h3>
+<table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+        <th>Product</th>
+        <th>Total Crates</th>
+        <th>Total Pieces</th>
+        <th>Total Quantity</th>
+    </tr>
+    {% for sale in sales_summary %}
+        <tr>
+            <td>{{ sale.product }}</td>
+            <td>{{ sale.total_crates|default:"-" }}</td>
+            <td>{{ sale.total_pieces|default:"-" }}</td>
+            <td>{{ sale.total_quantity|default:"-" }}</td>
+        </tr>
+    {% endfor %}
+</table>

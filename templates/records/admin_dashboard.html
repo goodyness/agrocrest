@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="w-full max-w-7xl mx-auto py-6 px-3 sm:px-6 lg:px-8">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">📋 Admin Dashboard</h2>
+
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit"
+        class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-medium px-5 py-2.5 rounded-lg shadow transition duration-200">
+        🚪 Logout
+      </button>
+    </form>
+  </div>
+
+  <!-- Low Stock Alert -->
+  {% if low_stock_alert %}
+    <div class="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-6 shadow-sm">
+      <div class="flex items-start gap-2">
+        <span class="text-lg">⚠</span>
+        <p class="text-sm sm:text-base">
+          <strong class="font-semibold">Low Stock Alert!</strong><br>
+          The following feed categories are running low:
+          <span class="font-medium">{{ low_stock_alert|join:", " }}</span>
+        </p>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Forms: Feed Purchase + Expense -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 w-full">
+    <!-- Feed Purchase Form -->
+    <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+      <div class="bg-blue-600 text-white px-4 py-3 font-semibold text-lg">➕ Add Feed Purchase</div>
+      <div class="p-5">
+        <form method="post" class="space-y-4">
+          {% csrf_token %}
+          {{ feed_form.as_p }}
+          <button type="submit" name="feed_submit"
+            class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 rounded-lg shadow transition duration-200">
+            ✅ Save Feed Purchase
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Expense Form -->
+    <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+      <div class="bg-yellow-400 text-gray-900 px-4 py-3 font-semibold text-lg">💸 Add Expense</div>
+      <div class="p-5">
+        <form method="post" class="space-y-4">
+          {% csrf_token %}
+          {{ expense_form.as_p }}
+          <button type="submit" name="expense_submit"
+            class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 rounded-lg shadow transition duration-200">
+            📝 Save Expense
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Egg Production Records -->
+  <div class="bg-white rounded-2xl shadow-sm border mb-6 overflow-hidden">
+    <div class="bg-yellow-500 text-white px-4 py-3 font-semibold">Egg Production Records</div>
+    <div class="p-4 overflow-x-auto max-w-full">
+      <table class="min-w-[640px] w-full table-auto text-xs sm:text-sm border-collapse">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border px-3 py-2 text-left break-words">Date</th>
+            <th class="border px-3 py-2 text-left break-words">Worker</th>
+            <th class="border px-3 py-2 text-center break-words">Crates</th>
+            <th class="border px-3 py-2 text-center break-words">Pieces</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in egg_records %}
+            <tr class="hover:bg-gray-50 transition">
+              <td class="border px-3 py-2">{{ record.date }}</td>
+              <td class="border px-3 py-2">
+                {{ record.worker.get_full_name|default:record.worker.username }}
+              </td>
+              <td class="border px-3 py-2 text-center">{{ record.crates }}</td>
+              <td class="border px-3 py-2 text-center">{{ record.pieces }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4" class="text-center py-3 text-gray-500">No egg records yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Daily Egg Production Summary -->
+  <div class="bg-white rounded-2xl shadow-sm border mb-6 overflow-hidden">
+    <div class="bg-yellow-600 text-white px-4 py-3 font-semibold">Daily Egg Production Summary</div>
+    <div class="p-4 overflow-x-auto max-w-full">
+      <table class="min-w-[640px] w-full table-auto text-xs sm:text-sm border-collapse">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border px-3 py-2 text-left break-words">Date</th>
+            <th class="border px-3 py-2 text-center break-words">Total Crates</th>
+            <th class="border px-3 py-2 text-center break-words">Total Pieces</th>
+            <th class="border px-3 py-2 text-center break-words">Total Eggs (pieces)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for day in daily_egg_summary %}
+            <tr class="hover:bg-gray-50 transition">
+              <td class="border px-3 py-2">{{ day.date }}</td>
+              <td class="border px-3 py-2 text-center">{{ day.total_crates }}</td>
+              <td class="border px-3 py-2 text-center">{{ day.total_pieces }}</td>
+              <td class="border px-3 py-2 text-center">{{ day.total_eggs_in_pieces }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4" class="text-center py-3 text-gray-500">No summary data yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Feed Purchases (Ledger) -->
+  <div class="bg-white rounded-2xl shadow-sm border mb-6 overflow-hidden">
+    <div class="bg-sky-500 text-white px-4 py-3 font-semibold">Feed Purchases (Ledger)</div>
+    <div class="p-4 overflow-x-auto max-w-full">
+      <table class="min-w-[720px] w-full table-auto text-xs sm:text-sm border-collapse">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border px-3 py-2 text-left break-words">Date</th>
+            <th class="border px-3 py-2 text-left break-words">Animal Category</th>
+            <th class="border px-3 py-2 text-center break-words">Bags Purchased</th>
+            <th class="border px-3 py-2 text-center break-words">Price per Bag</th>
+            <th class="border px-3 py-2 text-center break-words">Total Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for purchase in feed_purchases %}
+            <tr class="hover:bg-gray-50 transition">
+              <td class="border px-3 py-2">{{ purchase.date }}</td>
+              <td class="border px-3 py-2">{{ purchase.animal_category }}</td>
+              <td class="border px-3 py-2 text-center">{{ purchase.quantity_bags }}</td>
+              <td class="border px-3 py-2 text-center">{{ purchase.price_per_bag }}</td>
+              <td class="border px-3 py-2 text-center">{{ purchase.total_cost }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="text-center py-3 text-gray-500">No purchases recorded yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Feed Summary (Totals) -->
+  <div class="bg-white rounded-2xl shadow-sm border mb-6 overflow-hidden">
+    <div class="bg-green-500 text-white px-4 py-3 font-semibold">Feed Summary (Totals)</div>
+    <div class="p-4 overflow-x-auto max-w-full">
+      <table class="min-w-[640px] w-full table-auto text-xs sm:text-sm border-collapse">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border px-3 py-2 text-left break-words">Animal Category</th>
+            <th class="border px-3 py-2 text-center break-words">Total Purchased (Bags)</th>
+            <th class="border px-3 py-2 text-center break-words">Total Used (Bags)</th>
+            <th class="border px-3 py-2 text-center break-words">Remaining (Bags)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for category, data in feed_summary.items %}
+            <tr class="hover:bg-gray-50 transition">
+              <td class="border px-3 py-2">{{ category }}</td>
+              <td class="border px-3 py-2 text-center">{{ data.total_purchased }}</td>
+              <td class="border px-3 py-2 text-center">{{ data.total_used }}</td>
+              <td class="border px-3 py-2 text-center">{{ data.remaining }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4" class="text-center py-3 text-gray-500">No summary data yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Sales Summary -->
+  <div class="bg-white rounded-2xl shadow-sm border mb-6 overflow-hidden">
+    <div class="bg-green-600 text-white px-4 py-3 font-semibold">Sales Summary</div>
+    <div class="p-4 overflow-x-auto max-w-full">
+      <table class="min-w-[720px] w-full table-auto text-xs sm:text-sm border-collapse">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border px-3 py-2 text-left break-words">Product</th>
+            <th class="border px-3 py-2 text-center break-words">Total Crates</th>
+            <th class="border px-3 py-2 text-center break-words">Total Pieces</th>
+            <th class="border px-3 py-2 text-center break-words">Total Quantity (Kg/Units)</th>
+            <th class="border px-3 py-2 text-right break-words">Total Income (₦)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sale in sales_summary %}
+            <tr class="hover:bg-gray-50 transition">
+              <td class="border px-3 py-2">{{ sale.product }}</td>
+              <td class="border px-3 py-2 text-center">{{ sale.total_crates|default:"-" }}</td>
+              <td class="border px-3 py-2 text-center">{{ sale.total_pieces|default:"-" }}</td>
+              <td class="border px-3 py-2 text-center">{{ sale.total_quantity|default:"-" }}</td>
+              <td class="border px-3 py-2 text-right">₦{{ sale.total_income|default:"0" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Other Expenses -->
+  <div class="bg-white rounded-2xl shadow-sm border mb-6 overflow-hidden">
+    <div class="bg-yellow-500 text-white px-4 py-3 font-semibold">Other Expenses</div>
+    <div class="p-4">
+      {% if expenses %}
+        <div class="overflow-x-auto max-w-full rounded-lg border border-gray-200">
+          <table class="min-w-[640px] w-full table-auto text-xs sm:text-sm">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-2 border-b text-left break-words">Date</th>
+                <th class="px-4 py-2 border-b text-left break-words">Description</th>
+                <th class="px-4 py-2 border-b text-right break-words">Amount (₦)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for expense in expenses %}
+                <tr class="hover:bg-gray-50 transition">
+                  <td class="px-4 py-2 border-b">{{ expense.date|date:"Y-m-d" }}</td>
+                  <td class="px-4 py-2 border-b">{{ expense.description }}</td>
+                  <td class="px-4 py-2 border-b text-right">₦{{ expense.amount }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-gray-500">No other expenses recorded yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Financial Summary (KPI Cards) -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-2xl shadow-sm border p-4">
+      <p class="text-sm text-gray-500">Total Feed Cost</p>
+      <p class="mt-1 text-lg font-semibold text-gray-800">₦{{ total_feed_cost }}</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border p-4">
+      <p class="text-sm text-gray-500">Total Other Expenses</p>
+      <p class="mt-1 text-lg font-semibold text-gray-800">₦{{ total_expenses }}</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border p-4">
+      <p class="text-sm text-gray-500">Total Sales Income</p>
+      <p class="mt-1 text-lg font-semibold text-gray-800">₦{{ total_sales_income }}</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border p-4">
+      <p class="text-sm text-gray-500">Profit</p>
+      <p class="mt-1 text-lg font-semibold
+         {% if profit >= 0 %} text-green-600 {% else %} text-red-600 {% endif %}">
+         ₦{{ profit }}
+      </p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroCrest Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex flex-col min-h-screen bg-gray-50 text-gray-800 overflow-x-hidden">
+
+    <!-- Navbar -->
+    <header class="bg-green-700 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <!-- Brand -->
+            <a href="/" class="text-2xl font-bold tracking-wide hover:text-yellow-300 transition">
+                🌱 AgroCrest
+            </a>
+            
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center gap-4">
+                {% if user.is_authenticated %}
+                    <span class="text-sm">Hello, {{ user.username }}</span>
+                    <a href="{% url 'logout' %}" 
+                       class="px-4 py-2 rounded-lg bg-red-500 font-medium hover:bg-red-600 transition">
+                        Logout
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" 
+                       class="px-4 py-2 rounded-lg bg-white text-green-700 font-medium hover:bg-gray-100 transition">
+                        Sign In
+                    </a>
+                    <a href="{% url 'signup' %}" 
+                       class="px-4 py-2 rounded-lg bg-yellow-400 text-gray-900 font-medium hover:bg-yellow-500 transition">
+                        Sign Up
+                    </a>
+                {% endif %}
+
+                <!-- Language Switcher -->
+                <form action="{% url 'set_language' %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <select name="language" onchange="this.form.submit()" 
+                            class="bg-gray-100 text-gray-800 border px-2 py-1 rounded text-sm focus:ring focus:ring-green-300">
+                        <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
+                        <option value="fr" {% if LANGUAGE_CODE == 'fr' %}selected{% endif %}>Français</option>
+                    </select>
+                </form>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="menu-btn" class="focus:outline-none">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-green-600 text-white px-6 pb-4 space-y-3">
+            {% if user.is_authenticated %}
+                <p class="text-sm">Hello, {{ user.username }}</p>
+                <a href="{% url 'logout' %}" 
+                   class="block px-4 py-2 rounded bg-red-500 font-medium hover:bg-red-600 transition">
+                    Logout
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" 
+                   class="block px-4 py-2 rounded bg-white text-green-700 font-medium hover:bg-gray-100 transition">
+                    Sign In
+                </a>
+                <a href="{% url 'signup' %}" 
+                   class="block px-4 py-2 rounded bg-yellow-400 text-gray-900 font-medium hover:bg-yellow-500 transition">
+                    Sign Up
+                </a>
+            {% endif %}
+
+            <!-- Language Switcher -->
+            <form action="{% url 'set_language' %}" method="post">
+                {% csrf_token %}
+                <select name="language" onchange="this.form.submit()" 
+                        class="w-full bg-gray-100 text-gray-800 border px-2 py-1 rounded text-sm focus:ring focus:ring-green-300">
+                    <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
+                    <option value="fr" {% if LANGUAGE_CODE == 'fr' %}selected{% endif %}>Français</option>
+                </select>
+            </form>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-x-hidden">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+
+    <!-- Footer -->
+    <footer class="bg-green-800 text-gray-200 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center text-center sm:text-left gap-2">
+            <p class="text-sm">&copy; {{ year|default:2025 }} AgroCrest Farm. All rights reserved.</p>
+            <p class="text-sm italic">For internal staff use only</p>
+        </div>
+    </footer>
+
+    <!-- Script for Mobile Menu -->
+    <script>
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>

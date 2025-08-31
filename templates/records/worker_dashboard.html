@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% load widget_tweaks %}
+{% block title %}Worker Dashboard{% endblock %}
+{% block content %}
+<div class="px-4 py-6 bg-gradient-to-br from-green-50 to-green-100 min-h-screen">
+
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-green-700">Welcome, {{ request.user.name }}</h2>
+            <p class="text-gray-600">Role: <span class="font-medium">{{ request.user.role }}</span></p>
+        </div>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit"
+                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md">
+                Logout
+            </button>
+        </form>
+    </div>
+
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M5 13l4 4L19 7" />
+            </svg>
+            Feed Remaining
+        </h2>
+
+        {% if feed_remaining %}
+            <ul class="space-y-2">
+                {% for category, remaining in feed_remaining.items %}
+                    <li class="flex justify-between items-center p-2 rounded-lg bg-green-50 text-sm">
+                        <span class="font-medium text-gray-700">{{ category }}</span>
+                        <span class="font-semibold text-green-700">{{ remaining }} bags</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-sm text-gray-500 italic">No feed records available</p>
+        {% endif %}
+    </div>
+
+    <br>
+
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Egg Production -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <!-- Header -->
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-6">
+                <span class="text-2xl">🥚</span>
+                Egg Production
+            </h3>
+
+            <!-- Form -->
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div class="space-y-3">
+                    {{ egg_form.as_p }}
+                </div>
+                <button type="submit" name="egg_submit"
+                    class="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-medium shadow transition-all duration-200 ease-in-out">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 4v16m8-8H4" />
+                    </svg>
+                    Submit Egg Record
+                </button>
+            </form>
+
+            <!-- Recent Records -->
+            <div class="mt-8">
+                <h4 class="text-md font-semibold text-gray-700 mb-3">📋 Recent Records</h4>
+                {% if egg_records %}
+                    <ul class="divide-y divide-gray-200 text-sm text-gray-700">
+                        {% for record in egg_records %}
+                            <li class="py-2 flex justify-between">
+                                <span class="font-medium text-gray-800">{{ record.date }}</span>
+                                <span class="text-gray-600">
+                                    {{ record.crates }} crates • {{ record.pieces }} pcs
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-gray-500 italic">No egg records yet.</p>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Feed Intake -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <!-- Header -->
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-6">
+                <span class="text-2xl">🌾</span>
+                Feed Intake
+            </h3>
+
+            <!-- Form -->
+            <form method="POST" class="space-y-5">
+                {% csrf_token %}
+                
+                <!-- Animal Category -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Animal Category</label>
+                    <div class="mt-1">
+                        {{ feed_form.animal_category|add_class:"w-full rounded-lg border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 text-sm" }}
+                    </div>
+                </div>
+
+                <!-- Quantity -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Quantity (<span id="unit_label" class="text-gray-500">bags/kg</span>)
+                    </label>
+                    <div class="mt-1">
+                        {{ feed_form.quantity|add_class:"w-full rounded-lg border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 text-sm" }}
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" name="feed_submit"
+                    class="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-medium shadow transition-all duration-200 ease-in-out">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Submit Feed Record
+                </button>
+            </form>
+
+            <!-- Records -->
+            <div class="mt-8 space-y-6 text-sm">
+                <!-- Today -->
+                <div>
+                    <h4 class="text-md font-semibold text-gray-700 mb-2">📅 Today</h4>
+                    {% if feed_totals_today %}
+                        <ul class="divide-y divide-gray-100">
+                            {% for feed in feed_totals_today %}
+                                <li class="py-2 flex justify-between">
+                                    <span class="font-medium text-gray-800">{{ feed.animal_category }}</span>
+                                    <span class="text-gray-600">
+                                        {{ feed.total_quantity }}
+                                        {% if feed.animal_category in 'laying_bird young_layer' %}bags{% else %}kg{% endif %}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-gray-500 italic">No feed records today.</p>
+                    {% endif %}
+                </div>
+
+                <!-- All Time -->
+                <div>
+                    <h4 class="text-md font-semibold text-gray-700 mb-2">📊 All Time</h4>
+                    {% if feed_totals_all %}
+                        <ul class="divide-y divide-gray-100">
+                            {% for feed in feed_totals_all %}
+                                <li class="py-2 flex justify-between">
+                                    <span class="font-medium text-gray-800">{{ feed.animal_category }}</span>
+                                    <span class="text-gray-600">
+                                        {{ feed.total_quantity }}
+                                        {% if feed.animal_category in 'laying_bird young_layer' %}bags{% else %}kg{% endif %}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-gray-500 italic">No feed records yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Sales Form -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 lg:col-span-2">
+    <h3 class="text-xl font-semibold text-green-700 mb-4">💰 Sales Record</h3>
+
+    {% if sale_form.errors %}
+        <div class="bg-red-50 border border-red-200 text-red-600 p-3 rounded mb-4 text-sm">
+            {% for field in sale_form %}
+                {% for error in field.errors %}
+                    <p>{{ field.label }}: {{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+            {% for error in sale_form.non_field_errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="POST" class="space-y-5">
+        {% csrf_token %}
+
+        {% for field in sale_form %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    {{ field.label }}
+                </label>
+                {{ field|add_class:"w-full rounded-lg border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500 text-sm p-2" }}
+
+                {% if field.help_text %}
+                    <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" name="sale_submit"
+            class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium shadow transition">
+            Submit Sale Record
+        </button>
+    </form>
+</div>
+
+
+
+        <!-- Sales Summary -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 lg:col-span-2">
+        <h3 class="text-xl font-semibold text-green-700 mb-4 flex items-center gap-2">
+            📊 <span>Sales Summary</span>
+        </h3>
+
+        <!-- Summary Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- All Time -->
+            <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+            <h4 class="font-semibold text-green-800 mb-2">All Time</h4>
+            <p class="text-sm">
+                <strong>Eggs:</strong> Crates: {{ egg_sales_total.total_crates|default:0 }}, 
+                Pieces: {{ egg_sales_total.total_pieces|default:0 }}
+            </p>
+            <ul class="list-disc list-inside text-gray-700 text-sm mt-2 space-y-1">
+                {% for item in other_sales_total %}
+                <li>{{ item.product }}: {{ item.total_quantity }}</li>
+                {% empty %}
+                <li class="text-gray-400">No other sales yet.</li>
+                {% endfor %}
+            </ul>
+            </div>
+
+            <!-- Today -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <h4 class="font-semibold text-blue-800 mb-2">Today ({{ today }})</h4>
+            <p class="text-sm">
+                <strong>Eggs:</strong> Crates: {{ egg_sales_today.total_crates|default:0 }}, 
+                Pieces: {{ egg_sales_today.total_pieces|default:0 }}
+            </p>
+            <ul class="list-disc list-inside text-gray-700 text-sm mt-2 space-y-1">
+                {% for item in other_sales_today %}
+                <li>{{ item.product }}: {{ item.total_quantity }}</li>
+                {% empty %}
+                <li class="text-gray-400">No other sales today.</li>
+                {% endfor %}
+            </ul>
+            </div>
+
+        </div>
+
+        <!-- Sales History -->
+        <div class="mt-8">
+            <h4 class="font-semibold mb-3">Sales History</h4>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+            <table class="w-full text-sm text-left border-collapse">
+                <thead class="bg-green-600 text-white text-xs uppercase">
+                <tr>
+                    <th class="py-3 px-4">Date</th>
+                    <th class="py-3 px-4">Product</th>
+                    <th class="py-3 px-4">Quantity</th>
+                    <th class="py-3 px-4">Crates</th>
+                    <th class="py-3 px-4">Pieces</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                {% for sale in sale_records %}
+                    <tr class="hover:bg-gray-50 transition">
+                    <td class="py-2 px-4">{{ sale.date }}</td>
+                    <td class="py-2 px-4">{{ sale.product }}</td>
+                    <td class="py-2 px-4">{{ sale.quantity|default:"-" }}</td>
+                    <td class="py-2 px-4">{{ sale.crates|default:"-" }}</td>
+                    <td class="py-2 px-4">{{ sale.pieces|default:"-" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                    <td colspan="5" class="text-center py-6 text-gray-400">No sales recorded yet.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+    // Update feed intake unit dynamically
+    const animalSelect = document.getElementById("id_animal_category");
+    const unitLabel = document.getElementById("unit_label");
+    function updateUnit() {
+        const animal = animalSelect.value;
+        unitLabel.textContent = (animal === "laying_bird" || animal === "young_layer") ? "bags" : "kg";
+    }
+    animalSelect.addEventListener("change", updateUnit);
+    updateUnit();
+</script>
+{% endblock %}
