@@ -5,12 +5,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-$!es&^z41pm*^&#8s0jr!fn$2_k5!47_jz9$5hxz$ad33zgade'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["agrocrest.pythonanywhere.com"]
 
 AUTH_USER_MODEL = 'records.CustomUser'
 
+import os
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
